@@ -9,7 +9,7 @@ DISK_SIZE_GB=200
 DISK_SKU="Standard_LRS"
 
 #az login
-#az group create --name ${RG_NAME} --location ${REGION}
+az group create --name ${RG_NAME} --location ${REGION}
 
 # Get latest kubernetes version
 K8S_VER=`az aks get-versions --location westus --output table | grep None | awk '{print $1}'`
