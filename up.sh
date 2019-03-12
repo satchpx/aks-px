@@ -1,15 +1,67 @@
 #!/usr/bin/env bash
 
+printUsage() {
+    cat <<EOUSAGE
+Usage:
+    up.sh
+      -g <Resource Group Name to create>
+      -r <Region> [westus|eastus]
+      -c <AKS Cluster Name>
+      -n <Cluster Size> [Optional, Default=3]
+      -s <PX Disk Size in GiB> [Optional, Default=200]
+      -d <Disk Type> [Optional, Default=Standard_LRS] [Supported Types: StandardSSD_LRS, Standard_LRS, UltraSSD_LRS]
+
+EOUSAGE
+    echo "Example: up.sh -g sathya-px-rg -r westus -c sathya-px-aks -n 3 -s 200 -d Standard_LRS"
+}
+
 # COMMON VARS
-RG_NAME="sathya-px-rg"
-REGION="westus"
-CLUSTER_NAME="sathya-px-aks"
 CLUSTER_SIZE=3
 DISK_SIZE_GB=200
 DISK_SKU="Standard_LRS"
+while getopts "h?:g:r:c:n:s:d:" opt; do
+    case "$opt" in
+    h|\?)
+        printUsage
+        exit 0
+        ;;
+    g)  RG_NAME=$OPTARG
+        ;;
+    r)  REGION=$OPTARG
+        ;;
+    c)  CLUSTER_NAME=$OPTARG
+        ;;
+    n)  CLUSTER_SIZE=$OPTARG
+        ;;
+    s)  DISK_SIZE_GB=$OPTARG
+        ;;
+    d)  DISK_SKU=$OPTARG
+        ;;
+    :)
+        echo "[ERROR] Option -$OPTARG requires an argument." >&2
+        exit 1
+        ;;
+    default)
+       printUsage
+       exit 1
+    esac
+done
+
+# Validate Input Args
+if [[ (-z ${RG_NAME}) || (-z ${REGION}) || (-z ${CLUSTER_NAME}) ]]; then
+    echo "[ERROR]: Required arguments missing"
+    printUsage
+    exit 1
+fi
+
+if [[ (${DISK_SKU} != "Standard_LRS") || (${DISK_SKU} != "StandardSSD_LRS") || (${DISK_SKU} != "UltraSSD_LRS") ]]; then
+    echo "[ERROR]: Invalid Disk type"
+    printUsage
+    exit 1
+fi
 
 #az login
-az group create --name ${RG_NAME} --location ${REGION}
+#az group create --name ${RG_NAME} --location ${REGION}
 
 # Get latest kubernetes version
 K8S_VER=`az aks get-versions --location westus --output table | grep None | awk '{print $1}'`
@@ -27,7 +79,8 @@ RG_NAME_UPPER=`echo ${RG_NAME} | tr '[:lower:]' '[:upper:]'`
 CLUSTER_NAME_UPPER=`echo ${CLUSTER_NAME} | tr '[:lower:]' '[:upper:]'`
 REGION_UPPER=`echo ${REGION} | tr '[:lower:]' '[:upper:]'`
 
-RG_UPPER="MC_${RG_NAME_UPPER}_${CLUSTER_NAME_UPPER}_${REGION_UPPER}
+#RG_UPPER="MC_${RG_NAME_UPPER}_${CLUSTER_NAME_UPPER}_${REGION_UPPER}"
+RG_UPPER="MC_${RG_NAME}_${CLUSTER_NAME}_${REGION}"
 az vm list --resource-group ${RG_UPPER} | jq '.[].name'
 
 # Attach disks
@@ -38,6 +91,14 @@ for vm in $(az vm list --resource-group ${RG_UPPER} | jq '.[].name' | tr -d "\""
 done
 
 # Install PX
-echo "[INFO]: Installing PX...@TODO"
+PX_CLUSTER_NAME=px-cluster-$(uuidgen)
+PX_INST_CMD="kubectl apply -f 'https://install.portworx.com/?mc=false\&kbver=${K8S_VER}\&k=etcd%3Ahttp%3A%2F%2Fpx-etcd1.portworx.com%3A2379%2Cetcd%3Ahttp%3A%2F%2Fpx-etcd2.portworx.com%3A2379%2Cetcd%3Ahttp%3A%2F%2Fpx-etcd3.portworx.com%3A2379\&c=${PX_CLUSTER_NAME}\&aks=true\&stork=true\&lh=true\&st=k8s'"
+echo "[INFO]: Installing PX..."
+echo "[INFO]: Running ${PX_INST_CMD}"
+eval "${PX_INST_CMD}"
 
 # Done
+echo "[INFO]: Done! Use kubectl to access your AKS cluster with PX installed"
+echo "[INFO]: Setting up pxctl alias"
+PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
+alias pxctl="kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl"
