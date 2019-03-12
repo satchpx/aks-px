@@ -54,7 +54,7 @@ if [[ (-z ${RG_NAME}) || (-z ${REGION}) || (-z ${CLUSTER_NAME}) ]]; then
     exit 1
 fi
 
-if [[ (${DISK_SKU} != "Standard_LRS") || (${DISK_SKU} != "StandardSSD_LRS") || (${DISK_SKU} != "UltraSSD_LRS") ]]; then
+if [[ (${DISK_SKU} != "Standard_LRS") && (${DISK_SKU} != "StandardSSD_LRS") && (${DISK_SKU} != "UltraSSD_LRS") ]]; then
     echo "[ERROR]: Invalid Disk type"
     printUsage
     exit 1
@@ -92,10 +92,13 @@ done
 
 # Install PX
 PX_CLUSTER_NAME=px-cluster-$(uuidgen)
-PX_INST_CMD="kubectl apply -f 'https://install.portworx.com/?mc=false\&kbver=${K8S_VER}\&k=etcd%3Ahttp%3A%2F%2Fpx-etcd1.portworx.com%3A2379%2Cetcd%3Ahttp%3A%2F%2Fpx-etcd2.portworx.com%3A2379%2Cetcd%3Ahttp%3A%2F%2Fpx-etcd3.portworx.com%3A2379\&c=${PX_CLUSTER_NAME}\&aks=true\&stork=true\&lh=true\&st=k8s'"
+PX_INST_CMD="kubectl apply -f https://install.portworx.com/?mc=false\&kbver=${K8S_VER}\&k=etcd%3Ahttp%3A%2F%2Fpx-etcd1.portworx.com%3A2379%2Cetcd%3Ahttp%3A%2F%2Fpx-etcd2.portworx.com%3A2379%2Cetcd%3Ahttp%3A%2F%2Fpx-etcd3.portworx.com%3A2379\&c=${PX_CLUSTER_NAME}\&aks=true\&stork=true\&lh=true\&st=k8s"
 echo "[INFO]: Installing PX..."
 echo "[INFO]: Running ${PX_INST_CMD}"
 eval "${PX_INST_CMD}"
+
+echo "[INFO]: Sleeping for px to start..."
+sleep 180
 
 # Done
 echo "[INFO]: Done! Use kubectl to access your AKS cluster with PX installed"
