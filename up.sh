@@ -60,8 +60,9 @@ if [[ (${DISK_SKU} != "Standard_LRS") && (${DISK_SKU} != "StandardSSD_LRS") && (
     exit 1
 fi
 
-#az login
-#az group create --name ${RG_NAME} --location ${REGION}
+# @TODO: make login non-interactive
+az login
+az group create --name ${RG_NAME} --location ${REGION}
 
 # Get latest kubernetes version
 K8S_VER=`az aks get-versions --location westus --output table | grep None | awk '{print $1}'`
@@ -101,7 +102,7 @@ echo "[INFO]: Sleeping for px to start..."
 sleep 180
 
 # Done
-echo "[INFO]: Done! Use kubectl to access your AKS cluster with PX installed"
 echo "[INFO]: Setting up pxctl alias"
 PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
 alias pxctl="kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl"
+echo "[INFO]: Done! Use kubectl and pxctl to access your AKS cluster with PX installed"
