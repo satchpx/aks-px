@@ -25,3 +25,19 @@ Usage:
 Example:
     destroy.sh -g sathya-px-rg
 ```
+
+## To use REST API to deploy the cluster
+
+First install pre-requisites
+```
+1. Install python3: https://realpython.com/installing-python/
+2. Install pip https://pip.pypa.io/en/stable/installing/
+3. pip install -r requirements.txt
+```
+
+Execute
+```
+Usage:
+    deploy.py
+
+```
