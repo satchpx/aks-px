@@ -67,8 +67,10 @@ az group create --name ${RG_NAME} --location ${REGION}
 # Get latest kubernetes version
 K8S_VER=`az aks get-versions --location westus --output table | grep None | awk '{print $1}'`
 
+# Set cluster max size
+CLUSTER_SIZE_MAX=$((CLUSTER_SIZE*2))
 echo "[INFO]: Deploying AKS cluster ${CLUSTER_NAME}"
-az aks create --resource-group ${RG_NAME} --name ${CLUSTER_NAME} --node-count ${CLUSTER_SIZE} --enable-addons monitoring --generate-ssh-keys --kubernetes-version ${K8S_VER}
+az aks create --resource-group ${RG_NAME} --name ${CLUSTER_NAME} --node-count ${CLUSTER_SIZE} --enable-vmss --enable-cluster-autoscaler --min-count ${CLUSTER_SIZE} --max-count ${CLUSTER_SIZE_MAX} --enable-addons monitoring --generate-ssh-keys --kubernetes-version ${K8S_VER}
 echo "[INFO]: backing up current kube-config into \"~/.kube/config.bak\""
 mv ~/.kube/config ~/.kube/config.bak
 cat /dev/null > ~/.kube/config
