@@ -6,6 +6,33 @@ kubectl edit deploy stork -n kube-system
 ```
 search for `image: ` and change image to `openstorage/stork:master`
 
+## Update stork-role permissions
+```
+kubectl edit clusterrole stork-role -n kube-system
+```
+Search for `migrations` and add the additional permissions. The section should look like:
+```
+- apiGroups:
+  - stork.libopenstorage.org
+  resources:
+  - migrations
+  - clusterpairs
+  - groupvolumesnapshots
+  - storageclusters
+  - schedulepolicies
+  - migrationschedules
+  - volumesnapshotschedules
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - create
+  - delete
+  ```
+
+
 ## Create Schedule Policy
 Apply the schedulePolicy below:
 ```
@@ -98,3 +125,20 @@ pvcsc-cs-001   Bound    pvc-128b7724-5030-11e9-8a56-000c2933610a   2Gi        RW
 root@node1:~#
 ```
 ## Check Cloudsnaps
+We can use different means to verify that the snapshots were created:
+```kubectl get volumesnapshots
+NAME                                                       AGE
+pvcsc-cs-001-default-schedule-interval-2019-03-27-015546   2m
+pvcsc-cs-001-weekly-schedule-interval-2019-03-27-015546    2m
+root@node1:~# pxctl cs list
+SOURCEVOLUME						SOURCEVOLUMEID			CLOUD-SNAP-ID								CREATED-TIME				TYPE		STATUS
+pvc-128b7724-5030-11e9-8a56-000c2933610a		35471192544934465		071c0f65-e596-41b7-a944-5818b3dae1c3/35471192544934465-302693491218158770		Wed, 27 Mar 2019 01:55:47 UTC		Manual		Done
+root@node1:~# pxctl v l -s -p pvc-128b7724-5030-11e9-8a56-000c2933610a
+ID			NAME											SIZE	HA	SHARED	ENCRYPTED	IO_PRIORITY	STATUS		SNAP-ENABLED
+302693491218158770	pvc-128b7724-5030-11e9-8a56-000c2933610a_35471192544934465_clmanual_2019-03-27T01-55-46	2 GiB	2	no	no		LOW	up - detached	no
+790045360885055977	snapshot-7012f4a0-5033-11e9-8a56-000c2933610a						2 GiB	2	no	no		LOW	up - detached	no
+root@node1:~# storkctl get volumesnapshots
+NAME                                                       PVC            STATUS    CREATED               COMPLETED             TYPE
+pvcsc-cs-001-default-schedule-interval-2019-03-27-015546   pvcsc-cs-001   Ready     26 Mar 19 21:55 EDT   26 Mar 19 21:55 EDT   local
+pvcsc-cs-001-weekly-schedule-interval-2019-03-27-015546    pvcsc-cs-001   Ready     26 Mar 19 21:55 EDT   26 Mar 19 21:55 EDT   cloud
+```
