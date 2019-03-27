@@ -126,7 +126,8 @@ root@node1:~#
 ```
 ## Check Cloudsnaps
 We can use different means to verify that the snapshots were created:
-```kubectl get volumesnapshots
+```
+kubectl get volumesnapshots
 NAME                                                       AGE
 pvcsc-cs-001-default-schedule-interval-2019-03-27-015546   2m
 pvcsc-cs-001-weekly-schedule-interval-2019-03-27-015546    2m
