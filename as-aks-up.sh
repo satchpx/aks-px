@@ -70,8 +70,7 @@ K8S_VER=`az aks get-versions --location westus --output table | grep None | awk 
 # Set cluster max size
 CLUSTER_SIZE_MAX=$((CLUSTER_SIZE*2))
 echo "[INFO]: Deploying AKS cluster ${CLUSTER_NAME}"
-#az aks create --resource-group ${RG_NAME} --name ${CLUSTER_NAME} --node-count ${CLUSTER_SIZE} --enable-vmss --enable-cluster-autoscaler --min-count ${CLUSTER_SIZE} --max-count ${CLUSTER_SIZE_MAX} --enable-addons monitoring --generate-ssh-keys --kubernetes-version ${K8S_VER}
-az aks create --resource-group ${RG_NAME} --name ${CLUSTER_NAME} --node-count ${CLUSTER_SIZE} --enable-addons monitoring --generate-ssh-keys --kubernetes-version ${K8S_VER}
+az aks create --resource-group ${RG_NAME} --name ${CLUSTER_NAME} --node-count ${CLUSTER_SIZE} --enable-vmss --enable-cluster-autoscaler --min-count ${CLUSTER_SIZE} --max-count ${CLUSTER_SIZE_MAX} --enable-addons monitoring --generate-ssh-keys --kubernetes-version ${K8S_VER}
 echo "[INFO]: backing up current kube-config into \"~/.kube/config.bak\""
 mv ~/.kube/config ~/.kube/config.bak
 cat /dev/null > ~/.kube/config
@@ -87,25 +86,6 @@ REGION_UPPER=`echo ${REGION} | tr '[:lower:]' '[:upper:]'`
 RG_UPPER="MC_${RG_NAME}_${CLUSTER_NAME}_${REGION}"
 az vm list --resource-group ${RG_UPPER} | jq '.[].name'
 
-# Attach disks
-echo "[INFO]: Attaching disks to VMs now..."
-for vm in $(az vm list --resource-group ${RG_UPPER} | jq '.[].name' | tr -d "\""); do
-    echo "Attaching disk to vm $vm"
-    az vm disk attach --resource-group ${RG_UPPER} --vm-name $vm --name px_$vm --size-gb ${DISK_SIZE_GB} --sku ${DISK_SKU} --new
-done
-
-# Install PX
-PX_CLUSTER_NAME=px-cluster-$(uuidgen)
-PX_INST_CMD="kubectl apply -f https://install.portworx.com/?mc=false\&kbver=${K8S_VER}\&k=etcd%3Ahttp%3A%2F%2Fpx-etcd1.portworx.com%3A2379%2Cetcd%3Ahttp%3A%2F%2Fpx-etcd2.portworx.com%3A2379%2Cetcd%3Ahttp%3A%2F%2Fpx-etcd3.portworx.com%3A2379\&c=${PX_CLUSTER_NAME}\&aks=true\&stork=true\&lh=true\&st=k8s"
-echo "[INFO]: Installing PX..."
-echo "[INFO]: Running ${PX_INST_CMD}"
-eval "${PX_INST_CMD}"
-
-echo "[INFO]: Sleeping for px to start..."
-sleep 180
-
-# Done
-echo "[INFO]: Setting up pxctl alias"
-PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
-alias pxctl="kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl"
-echo "[INFO]: Done! Use kubectl and pxctl to access your AKS cluster with PX installed"
+echo "[INFO]: Finished deploying AKS cluster with VMSS and autoscaler enabled."
+echo "[INFO]: Skipping adding drives and installing PX..."
+echo "[INFO]: Please install portworx with cloud-drive-management. Refer to https://github.com/satchpx/aks-px/tree/master/cloud-drive-management"
