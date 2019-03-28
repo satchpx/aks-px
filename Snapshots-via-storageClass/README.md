@@ -43,14 +43,18 @@ metadata:
 policy:
   interval:
     intervalMinutes: 10
+    retain: 4
   daily:
     time: "10:14PM"
+    retain: 3
   weekly:
     day: "Thursday"
     time: "10:13PM"
+    retain: 2
   monthly:
     date: 14
     time: "8:05PM"
+    retain: 1
 ```
 
 ```
@@ -143,3 +147,6 @@ NAME                                                       PVC            STATUS
 pvcsc-cs-001-default-schedule-interval-2019-03-27-015546   pvcsc-cs-001   Ready     26 Mar 19 21:55 EDT   26 Mar 19 21:55 EDT   local
 pvcsc-cs-001-weekly-schedule-interval-2019-03-27-015546    pvcsc-cs-001   Ready     26 Mar 19 21:55 EDT   26 Mar 19 21:55 EDT   cloud
 ```
+
+## Restore from cloudsnap
+@TODO: Add/ illustrate an example of restoring a pvc from one of the snapshots above
