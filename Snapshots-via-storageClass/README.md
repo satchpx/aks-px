@@ -103,7 +103,7 @@ stork-snapshot-sc          stork-snapshot                  22d
 ## Create PVC
 Create a PVC that uses the storageClass created above:
 ```
-ind: PersistentVolumeClaim
+kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: pvcsc-cs-001
