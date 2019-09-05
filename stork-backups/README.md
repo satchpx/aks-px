@@ -1,6 +1,7 @@
 # Using Stork to perform backups
 
 ## Pre-requisites
+* Note: The pre-requisites are needed only with the private  build. With Portworx version 2.2 and Stork 2.3 GA, the steps below will not be required 
 
 ### 1. Update stork
 ```
