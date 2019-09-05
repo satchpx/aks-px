@@ -74,6 +74,7 @@ spec:
 ```
 
 ## Create ApplicationRestore
+* Note: In this example, we're restoring from a periodic backup from cluster A, and restoring it on cluster-B. In case of restoring in the same  cluster, skip step 1 below, and start directly from step 2.
 ### 1. Create the BackupLocation object
 ```
 apiVersion: stork.libopenstorage.org/v1alpha1
