@@ -1,0 +1,10 @@
+apiVersion: stork.libopenstorage.org/v1alpha1
+kind: ApplicationRestore
+metadata:
+  name: restore001
+  namespace: kube-system
+spec:
+  backupName: backup001
+  backupLocation: pwx-backuplocation
+  namespaceMapping:
+    mysql: cassandra-backup

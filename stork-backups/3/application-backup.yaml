@@ -1,0 +1,10 @@
+apiVersion: stork.libopenstorage.org/v1alpha1
+kind: ApplicationBackup
+metadata:
+  name: backup001
+  namespace: kube-system
+spec:
+  backupLocation: pwx-backuplocation
+  # namespaces to be backed up
+  namespaces:
+  - cassandra
