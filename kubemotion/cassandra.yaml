@@ -19,8 +19,6 @@ provisioner: kubernetes.io/portworx-volume
 parameters:
   repl: "2"
   priority_io: "high"
-  group: "cassandra_vg"
-  fg: "true"
 ---
 apiVersion: "apps/v1"
 kind: StatefulSet
