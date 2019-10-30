@@ -7,4 +7,4 @@ spec:
   backupName: backup001
   backupLocation: pwx-backuplocation
   namespaceMapping:
-    mysql: cassandra-backup
+    cassandra: cassandra-backup
