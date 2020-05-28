@@ -1,39 +1,17 @@
 # Using Stork to perform backups
 
 ## Pre-requisites
-* Note: The pre-requisites are needed only with the private  build. With Portworx version 2.2 and Stork 2.3 GA, the steps below will not be required 
-
-### 1. Update stork
+### 1. Install Portworx and Stork
 ```
-kubectl -n kube-system set image deploy/stork stork=disrani/stork:2.3-dev  --record=true
+https://docs.portworx.com/portworx-install-with-kubernetes/#installation
 ```
 
-### 2. Update Portworx
+### 2. Verify
 ```
-kubectl -n kube-system set image ds/portworx portworx=portworx/oci-monitor:2.2.0-rc1  --record=true
-```
-
-### 3. Update stork-role permissions
-kubectl edit clusterrole -n kube-system stork-role
-```
-- apiGroups:
-  - '*'
-  resources:
-  - '*'
-  verbs:
-  - '*'
+kubectl -n kube-system get ds portworx
+kubectl -n kube-system get deploy stork
 ```
 
-kubectl edit clusterrole -n kube-system node-get-put-list-role
-```
-- apiGroups:
-  - "stork.libopenstorage.org"
-  resources:
-  - '*'
-  verbs:
-  - get
-  - list
-```
 
 ## Below are the scenarios we'll run through (Refer to the appropriate directory)
 1. [Backup and restore in the same namespace](https://github.com/satchpx/aks-px/tree/master/stork-backups/1)
