@@ -13,7 +13,7 @@ kubectl -n kube-system get deploy stork
 ```
 
 
-## Below are the scenarios we'll run through (Refer to the appropriate directory)
+## Below are the scenarios we'll run through
 1. [Backup and restore in the same namespace](https://github.com/satchpx/aks-px/tree/master/stork-backups/1)
 2. [Backup Namespaces from one cluster and restore on another cluster](https://github.com/satchpx/aks-px/tree/master/stork-backups/2)
 3. [Backup a Namespace and Restore it in a different Namespace](https://github.com/satchpx/aks-px/tree/master/stork-backups/3)
